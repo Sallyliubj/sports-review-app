@@ -1,0 +1,176 @@
+{% extends 'base.html'%}
+
+{% block title %}
+{{ sport.trail_name }} - SportSearch
+{% endblock title %}
+
+{% block head %}
+    <script>
+        function showAlert(message) {
+            alert(message);
+        }
+
+        // Function to show sport has been successfully saved.
+        function saveSport(button) {
+            const form = button.closest('form');
+            fetch('/save_sport', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(new FormData(form))
+            })
+            .then(response => response.json()) // Backend will send success/failure response
+            .then(data => { // Show status to user and update buttons as needed
+                showAlert(data.message);
+                if (data.message === "Sport saved successfully!") {
+                    button.classList.add('saved');
+                    button.disabled = true;
+                    button.textContent = 'Saved';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while saving the sport.');
+            });
+        }
+
+        // Function to update like count
+        function handleLike(button) {
+            const reviewId = button.getAttribute('data-review-id');
+            fetch('/like_review', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ 'review_id': reviewId })
+            })
+            .then(response => response.json()) // Backend will send success/failure response
+            .then(data => { // Show status to user and update buttons as needed
+                showAlert(data.message);
+                if (data.message === "Review liked successfully!") {
+                    button.classList.add('saved-liked');
+                    button.disabled = true;
+                    button.textContent = '❤️ Liked';
+                    // Update the like count dynamically
+                    const likeCountElement = button.nextElementSibling;
+                    likeCountElement.textContent = parseInt(likeCountElement.textContent) + 1;
+                }
+                else if (data.message === "You have already liked this review.") {
+                    button.classList.add('saved-liked');
+                    button.disabled = true;
+                    button.textContent = '❤️ Liked';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while liking the review.');
+            });
+        }
+        
+    </script>
+{% endblock head %}
+
+{% block content %}
+<body>
+    <!--Basic Sport Metadata-->
+    <h1>{{ sport.trail_name }}</h1>
+    <!--Location-->
+    <li>
+        {% if location_error %}
+            <p class="error">{{ location_error }}</p>
+        {% else %}
+            {% if city and state %}
+                <strong>Location:</strong> {{ city }}, {{ state }}<br>
+            {% else %}
+                <strong><p>City & State unavailable.</p></strong> 
+            {% endif %}
+        {% endif %}
+    </li>
+    <li> <strong>Sport Type:</strong> {{ sport['sport_type'] }}<br> </li>
+    <li> <strong>Difficulty:</strong> {{ sport['difficulty'] }}<br> </li>
+    <li> <strong>Rating:</strong> {{ sport['rating'] }}<br> </li>
+    <li> <strong>Price:</strong> {{ sport['price'] }}<br> </li>
+    <li> <strong>Number of people completed:</strong> {{ sport['num_people_completed'] }}<br>
+    
+    <!--Check Sport Status-->
+    {% if sport['completed'] %}
+        <p class="completed">Completed</p>
+    {% elif sport['saved'] %}
+        <p class="saved">Saved</p>
+    {% else %}
+        <form action="/save_sport" method="POST" style="display:inline;">
+            <input type="hidden" name="sport_id" value="{{ sport['sport_id'] }}">
+            <button type="button" onclick="saveSport(this)">Save</button>
+        </form>
+    {% endif %}
+
+    <!--Equipment-->
+    <div class="equipment">
+        {% if equipment_error %}
+            <p class="error">{{ equipment_error }}</p>
+        {% else %}
+            {% if equipment %}
+                <h3> Equipment Required: </h3>
+                {% for equip in equipment %}
+                    <p> <i> {{ equip['equipment_name'] }} </i> - ${{ equip['cost'] }}</p>
+                {% endfor %}
+            {% else %}
+                <h3>No equipment required.</h3>
+            {% endif %}
+        {% endif %}
+    </div>
+    
+    <!--Reviews-->
+    <div class="reviews">
+        {% if review_error %}
+            <p class="error">{{ review_error }}</p>
+        {% else %}
+             {% if reviews %}
+                <h3> Reviews</h3>
+                {% for review in reviews %}
+                    <div class="review">
+                        <strong>{{ review.username }}</strong> <br>
+                        <p class="review-date">
+                            <i>Date Reviewed: {{ review.time_written }} | Date Completed: {{ review.date_completed }}</i>
+                        </p>
+                        <p class="review-content">
+                            <i>Rating:</i> {{ review.rating }}
+                        </p>
+                        <p class="review-content">
+                            <i>Comments:</i> {{ review.comments }}
+                        </p>
+                        <p>
+                            <!-- like does not update dynamically. reload to see.-->
+                            <form style="display:inline;">
+                                <input type="hidden" name="review_id" value="{{ review.review_id }}">
+                                <button class="like-button" type="button" onclick="handleLike(this)" data-review-id="{{ review.review_id }}">❤️ Like</button> (<span class="like-count">{{ review.like_count }}</span>)
+                            </form>
+                        </p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <h3>No reviews yet.</h3>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!--Related Sports (same type)-->
+    <div class="related">
+        {% if related_error %}
+            <p class="error">{{ related_error }}</p>
+        {% else %}
+             {% if related_sports %}
+                <h3>More '{{ sport['sport_type'] }}' Trails</h3>
+                {% for related_sport in related_sports %}
+                    <a href="{{ url_for('sport') }}?id={{ related_sport['sport_id'] }}">{{ related_sport.trail_name }}</a><br>
+                {% endfor %}
+            {% else %}
+                <h3>No related trails yet.</h3>
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+
+{% endblock content %}
+

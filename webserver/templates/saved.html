@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Saved Sports - SportSearch
+{% endblock title %}
+
+{% block content %}
+    <body>
+        <h1>Saved Sports</h1>
+
+        {% if not session['username'] %}
+            <p>You must be logged in to view saved sports. <a href="/login">Login here</a></p>
+        {% else %}
+            <h2>Your Saved Sports</h2>
+            {% if saved_sports %}
+                <ul>
+                    {% for sport in saved_sports %}
+                        <li class="saved-sport">
+                            <a href="{{ url_for('sport') }}?id={{ sport['sport_id'] }}"><strong>{{ sport['trail_name'] }} ({{ sport['sport_type'] }})</strong></a><br>
+                            Rating: {{ sport['rating'] }}<br>
+                            Difficulty: {{ sport['difficulty'] }}<br>
+                            <form action="/complete_sport" method="POST" style="display:inline;">
+                                <input type="hidden" name="sport_id" value="{{ sport['sport_id'] }}">
+                                <input type="hidden" name="sport_type" value="{{ sport['sport_type'] }}">
+                                <input type="hidden" name="trail_name" value="{{ sport['trail_name'] }}">
+                                <button class="complete-button" type="submit">Mark as Completed</button>
+                            </form>
+                            <form action="/unsave_sport" method="POST" style="display:inline;">
+                                <input type="hidden" name="sport_id" value="{{ sport['sport_id'] }}">
+                                <button type="submit">Unsave</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>You have no saved sports.</p>
+            {% endif %}
+        {% endif %}
+    </body>
+{% endblock content %}

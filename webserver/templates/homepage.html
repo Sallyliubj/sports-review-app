@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block title %}
+Home - Sport Search
+{% endblock %}
+
+{% block content %}
+  <body>
+    <h2>Welcome, {{name}}!</h2>
+    <div>{{data}}</div>
+    
+    <h3>Trails In Your Area</h3>
+
+    <div>
+      {% for sport in sports %}
+        <a href="{{ url_for('sport') }}?id={{ sport['sport_id'] }}">
+          {{ sport.trail_name }}<br></a>
+      {% endfor %}
+    </div>
+  </body>
+{% endblock %}

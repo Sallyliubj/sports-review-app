@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Find Sport - SportSearch
+{% endblock %}
+
+{% block head %}
+    <script>
+        function showAlert(message) {
+            alert(message);
+        }
+
+        // Function to alert of saved status
+        function saveSport(button) {
+            const form = button.closest('form');
+            fetch('/save_sport', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(new FormData(form))
+            })
+            .then(response => response.json()) // Backend will send success/failure response
+            .then(data => { // Show user message & update buttons
+                showAlert(data.message); 
+                if (data.message === "Sport saved successfully!") {
+                    button.classList.add('saved');
+                    button.disabled = true;
+                    button.textContent = 'Saved';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while saving the sport.');
+            });
+        }
+
+        // Function to alert of new sport status
+        function addSport(button) {
+            const form = button.closest('form');
+            const formData = new FormData(form); // Send new sport to api
+            fetch('/add_sport', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json()) // Backend will send success/failure response
+            .then(data => { // Show user message & update buttons
+                showAlert(data.message);
+                if (data.message === "Sport added successfully!") {
+                    button.classList.add('added');
+                    button.disabled = true;
+                    button.textContent = 'Added';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while adding the sport.');
+            });
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <body>
+        <h1>Find Sport</h1>
+    
+        {% if not session['username'] %}
+            <p>You must be logged in to search for sports. <a href="/login">Login here</a></p>
+        {% else %}
+            <form action="/find_sport" method="POST">
+                <label for="sport_type">Sport Type:</label>
+                <select id="sport_type" name="sport_type" required>
+                    <option value="all">All</option>
+                    <option value="skiing">Skiing</option>
+                    <option value="hiking">Hiking</option>
+                    <option value="biking">Biking</option>
+                    <option value="kayaking">Kayaking</option>
+                    <option value="scuba diving">Scuba Diving</option>
+                </select><br>
+                <p style="font-size: 10px; color: grey">* Selecting all may take a few seconds to load.</p>
+
+                <label for="trail_name">Trail Name (Optional):</label>
+                <input type="text" id="trail_name" name="trail_name"><br>
+
+                <label for="city">City (Optional):</label>
+                <input type="text" id="city" name="city"><br>
+
+                <label for="rating">Minimum Rating (Optional):</label>
+                <input type="number" id="rating" name="rating" min="1" max="5" step="0.1"><br>
+
+                <label for="difficulty">Difficulty (Optional):</label>
+                <select id="difficulty" name="difficulty">
+                    <option value="">Select Difficulty</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select><br>
+
+                <label for="max_price">Maximum Price (Optional):</label>
+                <input type="number" id="max_price" name="max_price" step="1" min="0"><br>
+
+                <input type="submit" value="Find Sport">
+            </form>
+
+            {% if sports %}
+                <h2>Search Results:</h2>
+                <ul>
+                {% for sport in sports %}
+                    <li>
+                        <a href="{{ url_for('sport') }}?id={{ sport['sport_id'] }}"><strong>Trail Name:</strong> {{ sport.trail_name }}<br></a>
+                        <strong>Sport Type:</strong> {{ sport['sport_type'] }}<br>
+                        <strong>Difficulty:</strong> {{ sport['difficulty'] }}<br>
+                        <strong>Rating:</strong> {{ sport['rating'] }}<br>
+                        <strong>Price:</strong> {{ sport['price'] }}<br>
+                        <strong>Number of people completed:</strong> {{ sport['num_people_completed'] }}<br>
+                        {% if sport['completed'] %}
+                            <p class="completed">Completed</p>
+                        {% elif sport['saved'] %}
+                            <p class="saved">Saved</p>
+                        {% else %}
+                            <form style="display:inline;">
+                                <input type="hidden" name="sport_id" value="{{ sport['sport_id'] }}">
+                                <button type="button" onclick="saveSport(this)">Save</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                    <hr>
+                {% endfor %}
+                </ul>
+            {% endif %}
+                <div class="add-sport">
+                    <h2>Can't find a trail? Add a new one!</h2>
+                    <form>
+                        <label>Trail Name:</label>
+                        <input type="text" name="trail_name" required><br>
+        
+                        <label>Coordinates (Latitude, Longitude): </label>
+                        <input type="text" name="coordinate" required><br>
+                        
+                        <label>Sport Type:</label>
+                        <select name="sport_type" required>
+                            <option value="skiing">Skiing</option>
+                            <option value="hiking">Hiking</option>
+                            <option value="biking">Biking</option>
+                            <option value="kayaking">Kayaking</option>
+                            <option value="scuba diving">Scuba Diving</option>
+                        </select><br>
+        
+                        <label>Difficulty:</label>
+                        <select name="difficulty" required>
+                            <option value="">Select Difficulty</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select><br>
+                        
+                        <div class="equipment-box">
+                            <label class="equipment-box">Equipment (Optional):</label><br>
+                            <input type="checkbox" name="equipment" value="Hiking Boots">
+                            <label>Hiking Boots</label><br>
+                            <input type="checkbox" name="equipment" value="Scuba Tank">
+                            <label>Scuba Tank</label><br>
+                            <input type="checkbox" name="equipment" value="Mountain Bike">
+                            <label>Mountain Bike</label><br>
+                            <input type="checkbox" name="equipment" value="Kayak">
+                            <label>Kayak</label><br>
+                            <input type="checkbox" name="equipment" value="Ski Poles">
+                            <label>Ski Poles</label><br>
+                            <input type="checkbox" name="equipment" value="Wetsuit">
+                            <label>Wetsuit</label><br>
+                            <input type="checkbox" name="equipment" value="Climbing Harness">
+                            <label>Climbing Harness</label><br>
+                            <input type="checkbox" name="equipment" value="Sleeping Bag">
+                            <label>Sleeping Bag</label><br>
+                            <input type="checkbox" name="equipment" value="Ski Goggles">
+                            <label>Ski Goggles</label><br>
+                            <input type="checkbox" name="equipment" value="Tent">
+                            <label>Tent</label><br>
+                        </div>
+                        <!--do not submit form, handle outside-->
+                        <button type="button-green" onClick="addSport(this)">Add Sport</button>
+                    </form>
+                </div>
+        {% endif %}
+    </body>
+{% endblock %}

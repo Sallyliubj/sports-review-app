@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Sport Search {% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    <header style="display: flex; flex-direction: column; align-items: center">
+        <a href="/home"><h1><u>Sport Search</u></h1></a>
+        <nav>
+            <button onclick="location.href='/find_sport'">Find Sports</button>
+            <button onclick="location.href='/completed'">Your Completed Trails</button>
+            <button onclick="location.href='/saved'">Your Saved Trails</button>
+            <button onclick="location.href='/'" class="logout-button">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Completed Sports - SportSearch
+{% endblock title %}
+
+{% block content %}
+    <body>
+        <h1>Completed Sports</h1>
+        {% if not session['username'] %}
+            <p>You must be logged in to view completed sports. <a href="/login">Login here</a></p>
+        {% else %}
+            <h2>Your Completed Sports</h2>
+            {% if completed_sports %}
+                <ul>
+                    {% for sport in completed_sports %}
+                        <li class="completed-sport">
+                            <a href="{{ url_for('sport') }}?id={{ sport['sport_id'] }}"><strong>{{ sport['trail_name'] }} ({{ sport['sport_type'] }})</strong></a><br>
+                            Rating: {{ sport['rating'] }}<br>
+                            Difficulty: {{ sport['difficulty'] }}<br>
+                            <form action="/add_review" method="GET" style="display:inline;">
+                                <input type="hidden" name="sport_id" value="{{ sport['sport_id'] }}">
+                                <input type="hidden" name="sport_type" value="{{ sport['sport_type'] }}">
+                                <input type="hidden" name="trail_name" value="{{ sport['trail_name'] }}">
+                                <button type="submit">Write a Review</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>You have no completed sports.</p>
+            {% endif %}
+        {% endif %}
+    </body>
+{% endblock content %}

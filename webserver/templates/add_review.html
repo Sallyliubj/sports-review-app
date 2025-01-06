@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Write a Review
+{% endblock title %}
+
+{% block content %}
+    <body>
+        <h2>Write a Review for "{{ trail_name }} ({{ sport_type }})"</h2>
+
+        <form action="/add_review" method="POST">
+            <input type="hidden" name="sport_id" value="{{ sport_id }}">
+            <input type="hidden" name="sport_type" value="{{ sport_type }}">
+            <input type="hidden" name="trail_name" value="{{ trail_name }}">
+            
+            <label for="date_completed">Date Completed:</label>
+            <input type="date" id="date_completed" name="date_completed" required><br>
+
+            <label for="rating">Rating (1-5):</label>
+            <input type="number" id="rating" name="rating" min="1" max="5" required><br>
+
+            <label for="comments">Comments:</label><br>
+            <textarea id="comments" name="comments" rows="4" cols="50"></textarea><br>
+
+            <input type="submit" value="Submit Review">  <span><button onclick="location.href='/completed'">Back to Completed Trails</button></span>
+        </form>
+    </body>
+{% endblock content %}
