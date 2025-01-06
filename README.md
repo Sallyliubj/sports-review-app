@@ -44,11 +44,11 @@ Ensure you have the following installed:
 
     - The app requires a running PostgreSQL database to function. Since the server for the current PostgreSQL database is not running, you will need to:
 
-        - Set Up Your Own PostgreSQL Database:
-        - Create a database on your local machine or remote server.
-        - Match the Database Schema:
-            - Refer to [database_schema.md](database_schema.md) and [Database Schema.pdf](<Database Schema.pdf>) for the required tables and attributes.
-        - Update the DATABASE_URI in your `.env` file with your database connection string:
+        - Set up your own PostgreSQL database:
+            -  Create a database on your local machine or remote server.
+            -  Match the Database Schema:
+                -  Refer to [database_schema.md](database_schema.md) and [Database Schema.pdf](<Database Schema.pdf>) for the required tables and attributes.
+            -  Update the DATABASE_URI in your `.env` file with your database connection string:
 
         ```bash
         DATABASEURI = "postgresql://username:password@localhost/dbname"
@@ -57,5 +57,6 @@ Ensure you have the following installed:
 
     ```bash
     python3 webserver/server.py
+    
     
     The app will be available at http://localhost:8111
