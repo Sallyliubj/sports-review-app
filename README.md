@@ -57,6 +57,6 @@ Ensure you have the following installed:
 
     ```bash
     python3 webserver/server.py
-    
+    ```
     
     The app will be available at http://localhost:8111
